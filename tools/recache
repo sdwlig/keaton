@@ -1,0 +1,26 @@
+#!/bin/bash
+
+FIND=find
+# On MacOSX, using: brew install findutils
+if [ -f /usr/local/opt/findutils/libexec/gnubin/find ]; then
+    FIND=/usr/local/opt/findutils/libexec/gnubin/find
+fi
+
+cd nginx 2>/dev/null
+##!/usr/bin/env node
+# var fs = require('fs');
+# eval(fs.readFileSync('recache.js')+'');
+
+if [ ! -d node_modules ]; then yarn install 2>/dev/null; fi
+
+node --inspect-brk=localhost:9229 recache.js -l $@
+# node --inspect-brk recache.js $@
+# node recache.js $@
+# node recache.js -l $@
+
+# List files likely to be assets in increasing age.
+TAB=$'\t'
+(cd cache; echo '{"files":[';
+ ${FIND} * -type f -printf "%T+\t%p\n" | sort|sed -e "s/^[^${TAB}]*${TAB}\(.*\)/\1/" | \
+ egrep -v '^lib/|^test/|^games/libs-3js/|^src/|^scripts/'|sed -e 's@^@"/@' -e 's/$/",/'
+ echo '""]}') >cache/cmpfiles.json

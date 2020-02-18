@@ -1,0 +1,9 @@
+#!/bin/bash -xv
+
+cd nginx 2>/dev/null
+echo newfiles running in `pwd`
+# echo newfiles: `pwd`
+rm -f recache.file.cache recache.notfound
+# rm -rf cacheold/*
+# mv cache/* cacheold/
+bash -xv ./runrecache $@

@@ -1,0 +1,53 @@
+#!/bin/bash
+
+echo runrecache running in `pwd`
+
+bash -xv ./recache $@ \
+../../../games/sharedAssets-3js/envmaps@ \
+../../../games/sharedAssets-3js/envmaps/tcross:games/sharedAssets-3js/envmaps@ \
+../../../games/3p/blueprint3d-js/example@ \
+../../../author/manifest.json \
+../../../author/src:src \
+../../../author/assets:assets@ \
+../../../author/index.html:index.html \
+../../../author/3p/build:lib \
+../../../author/3p:lib \
+../../../author/wc:lib \
+../../../author/web_modules:lib@ \
+../../../author/scripts:/scripts \
+../../../author/tester.html:tester.html \
+../../../author/service-worker.js:service-worker.js \
+../../../author/test:test \
+../../../author/data:data \
+../../../author/images:images \
+../../../customer1 \
+../../../games/scripting:ezs \
+../../../doodleblue/:db \
+../../../games/3p/blueprint3d-js:games/3p/blueprint3d-js \
+../../../games/3p/blueprint3d-js/js:js \
+../../../games/3p/blueprint3d-js/example:assets@ \
+../../../games/3p/blueprint3d-js/example/rooms:rooms@ \
+../../../games/3p/blueprint3d-js/example/models:models@ \
+../../../games/tools:games/tools \
+../../../games/cmp-3js:games/cmp-3js \
+../../../games/src:games/src \
+../../../games/libs-3js:games/libs-3js \
+../../../games/sharedAssets-3js:games/sharedAssets-3js \
+../../../games/sharedAssets-3js/envmaps \
+../../../games/3p:games/3p \
+../../../games/servers:games/servers \
+../../../polymersnap/vmin:lib \
+../../../author/node_modules/jailed/lib:src \
+../../../author/node_modules:lib \
+
+exit 0
+
+../../../polymer:lib \
+
+-e index.html,tester.html \
+   -d /Users/sdw/cmp/github/services/cmp/nginx \
+   -p
+
+
+../../../polymer:components \
+../../../polymersnap:components \

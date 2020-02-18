@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd nginx 2>/dev/null
+# echo newfiles: `pwd`
+rm -f recache.file.cache
+rm -rf cacheold/*
+mv cache/* cacheold/
+./runrecache $@
