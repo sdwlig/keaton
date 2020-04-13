@@ -34,8 +34,9 @@ const ignoreCircular = ['index.html', 'lib/app-layout/app-scroll-effects/app-scr
 
 var verbose = options.verbose;
 var loops = options.loops;
-var entries = options.entries || options.entries.split(',');
-entries = (entries[0].length) || ['index.html', 'tester.html'];
+var entries = options.entries && options.entries.split(',');
+entries = entries || ['index.html', 'tester.html'];
+console.log(entries);
 
 try {
   cli.enable('help', 'version', 'status', 'glob', 'catchall');
@@ -137,6 +138,7 @@ try {
   const data = fs.readFileSync('recache.ignore');
   if (data) {
     ignore = JSON.parse(data) || {};
+    console.log(`Ignore list:`, ignore);
   }
 } catch (err) {
   if (!err.message.startsWith('ENOENT')) console.warn(err);
@@ -182,7 +184,8 @@ if (!files.length) {
     const s = path.split('/');
     let last = path;
     if (s && s.length) last = s[s.length - 1];
-    if (!(last === '.git' || last === '.local-chromium')) {
+    if (ignore[path]) console.log(`Ignoring: ${path}`);
+    if (!(last === '.git' || last === '.local-chromium') && !ignore[path]) {
       try {
         stat = fs.statSync(path);
       } catch (err) {
@@ -209,7 +212,7 @@ if (!files.length) {
         if (files.length < 100 || files.length % 10000 === 0) {
           if (verbose) console.log(`Files: ${files.length} rpath:${rec.rpath} dir:${rec.dir}`);
         }
-      } else if (stat && stat.isDirectory()) {
+      } else if (stat && stat.isDirectory() /* && !rpathcache[rpath] */) {
         // console.log(`dir:${path}`);
         try {
           const dfs = fs.readdirSync(path);
@@ -280,8 +283,10 @@ var pending = {}; // Pending rpath watched -> rpath to update
 var invPending = {}; // rpaths to update, for deciding to wait to update
 var done = {};
 var processFile;
+
 // Process each line, looking for file references to recurse on and update.
 var linefn = (line, entry, out, selfReferences) => {
+  if (line.includes('sourceMappingURL=')) return '';
   let nline = line;
   let x,
     skip = false;
@@ -346,7 +351,7 @@ var linefn = (line, entry, out, selfReferences) => {
           var sline = line.substring(0, 100);
           if (verbose)
             console.log(
-              `Couldn't find: ${ms} or ${path}/${ms} base:${entry.base} ms:${sms} in ${entry.path} line:${sline}`,
+              `Could not find: ${ms} or ${path}/${ms} base:${entry.base} ms:${sms} in ${entry.path} line:${sline}`,
               JSON.stringify(entry, null, 1).substring(0, 100),
             );
           notfound[`${path}/${ms}`] = true;
@@ -355,7 +360,7 @@ var linefn = (line, entry, out, selfReferences) => {
           // console.log(`fix:`, `"${fix.rpath}"`);
           // Hash, then write file if not seen before.
           let lhash = specialHash[fix.rpath] || hashcache[fix.rpath];
-          if (fix.rpath.includes('mwc-chip-set.js')) debugger;
+          // if (fix.rpath.includes('mwc-chip-set.js')) debugger;
           if (!lhash) {
             // lhash = hashSync(fix.cpath);
             // hashcache[entry.rpath] = `${lhash}`;
@@ -373,8 +378,8 @@ var linefn = (line, entry, out, selfReferences) => {
               lhash = plainhashcache[fix.rpath];
             } else
               lhash = specialHash[fix.rpath] || hashcache[fix.rpath];
-            if (!lhash) {
-              console.error(`hash wasn't found after processing:${fix.rpath}`);
+            if (!lhash && !entries.includes(fix.rpath)) {
+              console.error(`hash was not found after processing:${fix.rpath}`);
             }
           }
           if (lhash) {
@@ -420,7 +425,7 @@ function processFile(entry, pendingOk) {
   //   Probably could use same method, but have to manage 2 pending changes.
 
   // Don't recurse into entry points which are probably not import statements.
-  if (entry.rpath.includes('mwc-chip-set.js')) debugger;
+  // if (entry.rpath.includes('mwc-chip-set.js')) debugger;
   if (Object.keys(inProgress).length && entries.includes(entry.rpath)) return "entry";
   if (inProgress[entry.rpath] && !pendingOk) {
     let ok = false;
@@ -432,10 +437,10 @@ function processFile(entry, pendingOk) {
     }
     let cpath;
     try {
-      debugger;
       let hash = plainhashcache[entry.rpath];
       if (!hash) {
         hash = hashSync(entry.path);
+
         plainhashcache[entry.rpath] = hash; // {hash:`${hash}`, entry: entry};
       }
       // cpath = `cache/${entry.base}_${hash}__${entry.ext}`;
@@ -542,10 +547,10 @@ function processFile(entry, pendingOk) {
     done[entry.rpath] = true;
   }
   delete inProgress[entry.rpath];
-  let pentry = pending[entry.rpath];
+  const pentry = pending[entry.rpath];
   if (pentry) {
     while (pentry.length) {
-      let ent = pentry.shift();
+      const ent = pentry.shift();
       console.log(`    pending: Processing ${ent.rpath}`);
       delete inProgress[ent.rpath];
       delete invPending[ent.rpath];

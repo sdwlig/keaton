@@ -13,10 +13,10 @@ cd nginx 2>/dev/null
 
 if [ ! -d node_modules ]; then yarn install 2>/dev/null; fi
 
-node --inspect-brk=localhost:9229 recache.js -l $@
+# node --inspect-brk=localhost:9229 recache.js -l $@
 # node --inspect-brk recache.js $@
 # node recache.js $@
-# node recache.js -l $@
+node recache.js -l $@
 
 # List files likely to be assets in increasing age.
 TAB=$'\t'

@@ -2,14 +2,14 @@
 
 echo runrecache running in `pwd`
 
-bash -xv ./recache $@ \
-../../../games/sharedAssets-3js/envmaps@ \
-../../../games/sharedAssets-3js/envmaps/tcross:games/sharedAssets-3js/envmaps@ \
-../../../games/3p/blueprint3d-js/example@ \
+bash ./recache $@ \
+-e index.html,tester.html,src/auth.html \
+../../../games/3p/blueprint3d-js/example/itemDefinition.json \
 ../../../author/manifest.json \
 ../../../author/src:src \
 ../../../author/assets:assets@ \
 ../../../author/index.html:index.html \
+../../../author/src/auth.html:/src/auth.html \
 ../../../author/3p/build:lib \
 ../../../author/3p:lib \
 ../../../author/wc:lib \
@@ -26,14 +26,11 @@ bash -xv ./recache $@ \
 ../../../games/3p/blueprint3d-js:games/3p/blueprint3d-js \
 ../../../games/3p/blueprint3d-js/js:js \
 ../../../games/3p/blueprint3d-js/example:assets@ \
-../../../games/3p/blueprint3d-js/example/rooms:rooms@ \
-../../../games/3p/blueprint3d-js/example/models:models@ \
 ../../../games/tools:games/tools \
 ../../../games/cmp-3js:games/cmp-3js \
 ../../../games/src:games/src \
 ../../../games/libs-3js:games/libs-3js \
 ../../../games/sharedAssets-3js:games/sharedAssets-3js \
-../../../games/sharedAssets-3js/envmaps \
 ../../../games/3p:games/3p \
 ../../../games/servers:games/servers \
 ../../../polymersnap/vmin:lib \
